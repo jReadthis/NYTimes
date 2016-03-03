@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <array
+        name="section_array">
+        <item>Home</item>
+        <item>World</item>
+        <item>National</item>
+        <item>Politics</item>
+        <item>Business</item>
+    </array>
+</resources>
