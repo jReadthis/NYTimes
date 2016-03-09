@@ -20,7 +20,6 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.Toast;
 
 /**
  * Created by nano1 on 3/2/2016.
@@ -139,7 +138,9 @@ public class NavigationDrawerFragment extends Fragment {
                     R.drawable.ic_drawer,             /* nav drawer image to replace 'Up' caret */
                     R.string.navigation_drawer_open,  /* "open drawer" description for accessibility */
                     R.string.navigation_drawer_close  /* "close drawer" description for accessibility */
-            ) {
+            )
+
+            {
                 @Override
                 public void onDrawerClosed(View drawerView) {
                     super.onDrawerClosed(drawerView);
@@ -170,6 +171,7 @@ public class NavigationDrawerFragment extends Fragment {
                 }
             };
 
+
             if (!mUserLearnedDrawer && !mFromSavedInstanceState) {
                 mDrawerLayout.openDrawer(mFragmentContainerView);
             }
@@ -197,6 +199,8 @@ public class NavigationDrawerFragment extends Fragment {
                 mCallbacks.onNavigationDrawerItemSelected(position);
             }
         }
+
+
 
         @Override
         public void onAttach(Activity activity) {
@@ -270,7 +274,7 @@ public class NavigationDrawerFragment extends Fragment {
         /**
          * Callbacks interface that all activities using this fragment must implement.
          */
-        public static interface NavigationDrawerCallbacks {
+        public interface NavigationDrawerCallbacks {
             /**
              * Called when an item in the navigation drawer is selected.
              */

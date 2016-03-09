@@ -43,21 +43,61 @@ import retrofit2.Retrofit;
 public class ArticlesFragment extends Fragment {
 
     private static final String BASE_URL = "http://api.nytimes.com";
-    public String section;
     public static CustomTabsSession mCustomTabsSession;
+    public static CustomTabsClient mClient;
+    public String section;
+    CustomTabActivityHelper mCustomTabActivityHelper;
     private Article article;
     private List<Article.Result> results;
     private RecyclerView recyclerView;
     private Call<Article> call;
     private MainAdapter mainAdapter;
-    public static CustomTabsClient mClient;
-    CustomTabActivityHelper mCustomTabActivityHelper;
 
-    private static class NavigationCallback extends CustomTabsCallback {
-        @Override
-        public void onNavigationEvent(int navigationEvent, Bundle extras) {
-            super.onNavigationEvent(navigationEvent, extras);
+    private static CustomTabsSession getSession(){
+        if (mClient == null) {
+            mCustomTabsSession = null;
+        }else if (mCustomTabsSession == null) {
+            mCustomTabsSession = mClient.newSession(new NavigationCallback());
         }
+        return mCustomTabsSession;
+    }
+
+    public static void customTab(String URL, Context context) {
+
+        CustomTabsIntent.Builder builder = new CustomTabsIntent.Builder(getSession());
+        builder.setToolbarColor(Color.BLUE).setShowTitle(true);
+        prepareMenuItems(builder,context);
+        prepareActionButton(builder,context);
+        builder.setStartAnimations(context, R.anim.slide_in_right, R.anim.slide_out_left);
+        builder.setExitAnimations(context, R.anim.slide_in_left, R.anim.slide_out_right);
+        builder.setCloseButtonIcon(
+                BitmapFactory.decodeResource(MainActivity.getContext().getResources(), R.drawable.ic_arrow_back));
+        CustomTabsIntent customTabsIntent = builder.build();
+        CustomTabsHelper.addKeepAliveExtra(context, customTabsIntent.intent);
+        customTabsIntent.launchUrl((Activity) context, Uri.parse(URL));
+    }
+
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
+    private static void prepareMenuItems(CustomTabsIntent.Builder builder,Context context) {
+        Intent menuIntent = new Intent();
+        menuIntent.setClass(context, MainActivity.class);
+        // Optional animation configuration when the user clicks menu items.
+        Bundle menuBundle = ActivityOptions.makeCustomAnimation(context, android.R.anim.slide_in_left,
+                android.R.anim.slide_out_right).toBundle();
+        PendingIntent pi = PendingIntent.getActivity(context, 0, menuIntent, 0,
+                menuBundle);
+        builder.addMenuItem("Menu entry 1", pi);
+    }
+
+    private static void prepareActionButton(CustomTabsIntent.Builder builder, Context context) {
+        // An example intent that sends an email.
+        Intent actionIntent = new Intent(Intent.ACTION_SEND);
+        actionIntent.setType("*/*");
+        actionIntent.putExtra(Intent.EXTRA_EMAIL, "example@example.com");
+        actionIntent.putExtra(Intent.EXTRA_SUBJECT, "example");
+        PendingIntent pi = PendingIntent.getActivity(context, 0, actionIntent, 0);
+        Bitmap icon = BitmapFactory.decodeResource(MainActivity.getContext().getResources(), R.drawable.ic_launcher);
+        builder.setActionButton(icon, "send email", pi);
     }
 
     @Override
@@ -132,51 +172,11 @@ public class ArticlesFragment extends Fragment {
         super.onDestroy();
     }
 
-    private static CustomTabsSession getSession(){
-        if (mClient == null) {
-            mCustomTabsSession = null;
-        }else if (mCustomTabsSession == null) {
-            mCustomTabsSession = mClient.newSession(new NavigationCallback());
+    private static class NavigationCallback extends CustomTabsCallback {
+        @Override
+        public void onNavigationEvent(int navigationEvent, Bundle extras) {
+            super.onNavigationEvent(navigationEvent, extras);
         }
-        return mCustomTabsSession;
-    }
-
-    public static void customTab(String URL, Context context) {
-
-        CustomTabsIntent.Builder builder = new CustomTabsIntent.Builder(getSession());
-        builder.setToolbarColor(Color.BLUE).setShowTitle(true);
-        prepareMenuItems(builder,context);
-        prepareActionButton(builder,context);
-        builder.setStartAnimations(context, R.anim.slide_in_right, R.anim.slide_out_left);
-        builder.setExitAnimations(context, R.anim.slide_in_left, R.anim.slide_out_right);
-        builder.setCloseButtonIcon(
-                BitmapFactory.decodeResource(MainActivity.getContext().getResources(), R.drawable.ic_arrow_back));
-        CustomTabsIntent customTabsIntent = builder.build();
-        CustomTabsHelper.addKeepAliveExtra(context, customTabsIntent.intent);
-        customTabsIntent.launchUrl((Activity) context, Uri.parse(URL));
-    }
-
-    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
-    private static void prepareMenuItems(CustomTabsIntent.Builder builder,Context context) {
-        Intent menuIntent = new Intent();
-        menuIntent.setClass(context, MainActivity.class);
-        // Optional animation configuration when the user clicks menu items.
-        Bundle menuBundle = ActivityOptions.makeCustomAnimation(context, android.R.anim.slide_in_left,
-                android.R.anim.slide_out_right).toBundle();
-        PendingIntent pi = PendingIntent.getActivity(context, 0, menuIntent, 0,
-                menuBundle);
-        builder.addMenuItem("Menu entry 1", pi);
-    }
-
-    private static void prepareActionButton(CustomTabsIntent.Builder builder, Context context) {
-        // An example intent that sends an email.
-        Intent actionIntent = new Intent(Intent.ACTION_SEND);
-        actionIntent.setType("*/*");
-        actionIntent.putExtra(Intent.EXTRA_EMAIL, "example@example.com");
-        actionIntent.putExtra(Intent.EXTRA_SUBJECT, "example");
-        PendingIntent pi = PendingIntent.getActivity(context, 0, actionIntent, 0);
-        Bitmap icon = BitmapFactory.decodeResource(MainActivity.getContext().getResources(), R.drawable.ic_launcher);
-        builder.setActionButton(icon, "send email", pi);
     }
 }
 

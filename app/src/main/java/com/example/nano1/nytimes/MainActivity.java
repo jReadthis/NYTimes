@@ -10,22 +10,26 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.ViewGroup;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks {
 
-    private NavigationDrawerFragment mNavigationDrawerFragment;
-    private CharSequence mTitle;
-    private static Context mContext;
     private static final String SECTION_HOME = "home";
     private static final String SECTION_WORLD = "world";
     private static final String SECTION_NATIONAL = "national";
     private static final String SECTION_POLITICS = "politics";
     private static final String SECTION_BUSINESS = "business";
+    private static Context mContext;
+    private NavigationDrawerFragment mNavigationDrawerFragment;
+    private CharSequence mTitle;
+
+    public static Context getContext(){
+        return mContext;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,14 +39,11 @@ public class MainActivity extends AppCompatActivity
         mNavigationDrawerFragment = (NavigationDrawerFragment)
                 getSupportFragmentManager().findFragmentById(R.id.navigation_drawer);
         mTitle = getTitle();
+
         // Set up the drawer.
         mNavigationDrawerFragment.setUp(
                 R.id.navigation_drawer,
                 (DrawerLayout) findViewById(R.id.drawer_layout));
-    }
-
-    public static Context getContext(){
-        return mContext;
     }
 
     @Override
@@ -92,8 +93,10 @@ public class MainActivity extends AppCompatActivity
     public void restoreActionBar() {
         ActionBar actionBar = getSupportActionBar();
         assert actionBar != null;
-        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
+        //actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
+        actionBar.setHomeAsUpIndicator(R.drawable.ic_drawer);
         actionBar.setDisplayShowTitleEnabled(true);
+        actionBar.setHomeButtonEnabled(true);
         actionBar.setTitle(mTitle);
     }
 
@@ -130,15 +133,15 @@ public class MainActivity extends AppCompatActivity
 
         private static final String ARG_SECTION_NUMBER = "section_number";
 
+        public PlaceholderFragment(){
+        }
+
         public static PlaceholderFragment newInstance(int sectionNumber){
             PlaceholderFragment fragment = new PlaceholderFragment();
             Bundle args = new Bundle();
             args.putInt(ARG_SECTION_NUMBER, sectionNumber);
             fragment.setArguments(args);
             return fragment;
-        }
-
-        public PlaceholderFragment(){
         }
 
         @Override

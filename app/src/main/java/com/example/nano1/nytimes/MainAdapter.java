@@ -2,7 +2,6 @@ package com.example.nano1.nytimes;
 
 import android.content.Context;
 import android.content.Intent;
-import android.os.Parcelable;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,54 +19,65 @@ import java.util.List;
 public class MainAdapter extends RecyclerView.Adapter<MainAdapter.MainViewHolder> {
 
     private List<Article.Result> results;
-    Context context;
+    private LayoutInflater inflater;
+    private Context context;
 
     public MainAdapter(Context context,List<Article.Result> results){
         this.results = results;
+        inflater = LayoutInflater.from(context);
         this.context = context;
     }
 
-    @Override
-    public MainViewHolder onCreateViewHolder( final ViewGroup parent, final int viewType) {
-        final View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.main_single_item, parent,false);
-        return new MainViewHolder(v, new MainViewHolder.ArticleViewHolderClicks() {
-
-            @Override
-            public void onItemClick(View caller) {
-
-                Article.Result article = (Article.Result) caller.getTag();
-
-                int viewId = caller.getId();
-                if (viewId == R.id.imageView){
-                    Intent intent = new Intent(context, DetailActivity.class);
-                    intent.putExtra("article", article );
-                    context.startActivity(intent);
-                }
-                else {
-                    String url = article.getUrl();
-                    ArticlesFragment.customTab(url, context);
-
-                }
-            }
-        });
+    public void delete(int position){
+        results.remove(position);
+        notifyItemRemoved(position);
     }
 
     @Override
-    public void onBindViewHolder(final MainViewHolder holder, int position) {
+    public MainViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        View v = inflater.inflate(R.layout.main_single_item, parent,false);
+        MainViewHolder holder = new MainViewHolder(v);
+        return holder ;
+    }
+
+    @Override
+    public void onBindViewHolder(MainViewHolder holder, final int position) {
         final Article.Result article = results.get(position);
+
         holder.titleTextView.setText(article.getTitle());
         holder.abstractTextView.setText(article.getAbstractX());
+        holder.options.setImageResource(R.drawable.ic_menu_send);
 
         if (article.getMultimedia().size() != 0) {
             Picasso.with(context)
                     .load(article.getMultimedia().get(1).getUrl())
-                    .resize(200,200)
+                    .resize(200, 200)
                     .centerCrop()
                     .into(holder.imageView);
-        }else {
+        } else {
             holder.imageView.setImageResource(R.mipmap.ic_launcher);
         }
-        holder.itemView.setTag(article);
+        holder.imageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                    Intent intent = new Intent(context, DetailActivity.class);
+                    intent.putExtra("article", results.get(position) );
+                    context.startActivity(intent);
+            }
+        });
+        holder.options.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                delete(position);
+            }
+        });
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ArticlesFragment.customTab(article.getUrl(),context);
+            }
+        });
     }
 
     @Override
@@ -86,33 +96,19 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.MainViewHolder
     }
 
     // Implement ArticleViewHolderClicks
-    public static class MainViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    public static class MainViewHolder extends RecyclerView.ViewHolder {
         public TextView titleTextView;
         public TextView abstractTextView;
         public ImageView imageView;
-        ArticleViewHolderClicks mListener;
+        public ImageView options;
 
-        public MainViewHolder(View itemView, ArticleViewHolderClicks listener) {
+        public MainViewHolder(View itemView) {
             super(itemView);
             titleTextView = (TextView) itemView.findViewById(R.id.single_row_title);
             abstractTextView = (TextView) itemView.findViewById(R.id.single_row_abstract);
             imageView = (ImageView) itemView.findViewById(R.id.imageView);
-            imageView.setOnClickListener(this);
-            mListener = listener;
-            itemView.setOnClickListener(this);
-
+            options = (ImageView) itemView.findViewById(R.id.imageView2);
         }
 
-        @Override
-        public void onClick(View v) {
-            mListener.onItemClick(v);
-        }
-
-        // Interface to define the onclick events of the recycler view
-        public interface ArticleViewHolderClicks{
-            void onItemClick(View caller);
-        }
     }
-
-
 }
